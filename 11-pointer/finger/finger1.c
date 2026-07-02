@@ -1,22 +1,28 @@
 #include <stdio.h>
 
-//void pay_amount(int dollars, int *twenties, int *tens, int *fives, int *ones);
+void pay_amount(int dollars, int *twenties, int *tens, int *fives, int *ones);
 
 int main(void) {
-	int dollars, i;
-	int bills[4] = {0};
-	int num[4] = {20, 10, 5, 1};
+	int dollars;
+	int twenties, tens, fives, ones;
 
 	printf("Enter a dollar amount: ");
 	scanf("%d", &dollars);
 
-	bills[0] = dollars / 20;
-	bills[1] = (dollars - bills[0]*20 ) / 10;
-	bills[2] = (dollars - bills[0]*20 - bills[1]*10) / 5;
-	bills[3] = (dollars - bills[0]*20 - bills[1]*10 - bills[2]*5);
-
-	for (i=0; i<4; i++)
-		printf("$%d bills: %d\n",num[i] ,bills[i]);
+	pay_amount(dollars, &twenties, &tens, &fives, &ones);
+	
+	printf("$20 dollars need: %d\n", twenties);
+	printf("$10 dollars need: %d\n", tens);
+	printf("$5 dollars need: %d\n", fives);
+	printf("$1 dollars need: %d\n", ones);
 
 	return 0;
+}
+
+
+void pay_amount(int dollars, int *twenties, int *tens, int *fives, int *ones) {
+	*twenties = dollars / 20;
+	*tens = (dollars - *twenties * 20) / 10;
+	*fives = (dollars - *twenties * 20 - *tens * 10) / 5;
+	*ones = dollars - *twenties * 20 - *tens * 10 - *fives * 5;
 }
