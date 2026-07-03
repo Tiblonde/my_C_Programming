@@ -1,0 +1,68 @@
+22 input and output
+
+This longest chapter will discuss <stdio.h> where input/output functions are stored. Since chapter 2, we have already got familiar with printf(), scanf(), putchar(), getchar(), puts(), and gets(). We will provide more information about these functions, like fprintf() is just the file version of printf().
+
+Here are some basic concepts we will introduce: the idea of stream, FILE type, redirection of input and output, and the difference between text and bin file.
+
+22.1 stream
+
+The terminology *stream* represent the source of any input or the destination of any output. Most of the programs we had coded before get input from one stream (usually keyboard) and write output to one stream (usually screen).
+
+The idea is some large-scale program may need other streams, some of them represent the file stored in different medium (like disk driver, CD, DVD, and flash), or devices which dont store file (like printer). Terminology file sometimes represent stream.
+
+And functions in <stdio.h> can not only handle with file stream but also streams in other format.
+
+22.1.1 file pointer
+
+C-lan access stream by using file pointer. Some specific stream have unique standard name.
+
+	FILE *fp1, *fp2;
+
+<stdio.h> provides three standard streams for us to use without declaration or open or close it:
+
+	stdin	// standard input, from keyboard
+	stdout	// standard output, to screen
+	stderr	// standard error, to screen
+
+printf(), scanf(), putchar(), getchar(), puts(), and gets() all get input from stdin and write to stdout. By default, stdin represent keyboard and stdout stderr represent screen, but some operation system provides *redirection* to change the default.
+
+	demo < in.dat // redirection: get input from file instead of keyboard
+	demo > out.dat // redirection: write to file instead of screen
+	demo >out.dat <in.dat /*** VALID ***/
+	demo > out.dat < in.dat /*** VALID ****/
+
+22.1.3 text and binary file
+
+<stdio.h> supports two type of file: text file where one byte represent one character, and binary file where byte can represent beyond characters.
+
+Moreover, text file is divided into several lines. In Windows, the tag in the end of line is '\x0d' followed by '\x0a'. In UNIX or Maxintosh, the tag is a sole enter symbol.
+text file can include an special symbol indicating the end of file. In Windows, the symbol is 'xla' (Ctrl+Z). Most other operation systems don't have specific file-end-symbol
+
+22.2 file operation
+
+Redirection is simple: no need to open file, close file, or operate file. But when program only depends on redirection, it can't control its file, even can't access these files' name. Redirection also can't support program to read/write two file at the same time.
+
+22.2.1 open file
+
+	FILE *fopen(const char *filename, const char *mode);
+
+fopen() opens a file stream. The first argument is the name of file to open. The second argument is *mode string*, indicating the operation on file.
+
+	fp = fopen("in.dat", "r"); /* open in.dat for reading */
+
+fopen() returns a file pointer, user can store that into a file pointer variable. When program call input function to read from in.dat later, it will need fp to pass argument.
+
+Some mode string for text file:
+	"r" "w" "a" "r+" "w+" "a+"
+
+Some mode string for binary file:
+	"rb" "wb" "ab" "r+b"/"rb+" "w+b"/"wb+" "a+b/"ab+"
+
+Notice: write operation will cover the original content, but append operation will add data behind the file end.
+
+22.2.3 close file
+
+	int fclose(FILE *stream);
+
+
+	
