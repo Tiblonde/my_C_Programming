@@ -1,25 +1,27 @@
-9.1 function definition and call
+# 9 function
 
+## 9.1 function definition and call
+```c
 	double average(double a, double b) {
 		return (a + b) / 2;
 	}
-
-*double* in the begenning means the *return type* of the function. *a* and *b* here mean the parameter of the function. {} is the function *body*. To call the function, call average(x, y) and *x* *y* mean the argument of the function
+```
+**double** in the begenning means the **return type** of the function. **a** and **b** here mean the parameter of the function. {} is the function **body**. To call the function, call average(x, y) and **x, y** mean the argument of the function
 
 function declaration provides the compiler information about the function, and the complete definition will be followed later.
 
 function prototype is somekind function declaration.
 
-9.3.2 array argument
-
+### 9.3.2 array argument
+```c
 	int f(int a[]) {
 		...
 	}
-
+```
 array always be used as argument. When one-dimension array is used as parameter, one can dismiss the length of the array like above.
 
 But f funciton can't acknowlegde the length of the array (even use sizeof()), so in practice, the length usually be passed as additional parameter:
-
+```c
 	int f(int a[]) {
 		int len = sizeof(a) / sizeof(a[0]);
 		/*** WRONG: not the number of elements in a ***/
@@ -33,9 +35,8 @@ But f funciton can't acknowlegde the length of the array (even use sizeof()), so
 
 		return sum;
 	}
-
-9.3.3 variable array parameter (C99)
-
+```
+### 9.3.3 variable array parameter (C99)
+```c
 	int sum_array(int n, int a[n]); // The order matters!
-
-
+```

@@ -1,103 +1,113 @@
-13.1 string literal
+## 13.1 string literal
 
-*string literal* is character sequential that bracketed by two quota:
+**string literal** is character sequential that bracketed by two quota:
 	"Hello, world!"
 
 string literal is commonly used as format string in printf() and scanf().
 
-13.1 conversions in string literal
+## 13.1 conversions in string literal
 
 feel free to include conversions inside string literal, just like in printf() and scanf():
 	"Candy\nIs dandy\nBut liquor\nIs quicker.\n --Ogden Nash\n"
 
-13.1.2 continuation string literal
+### 13.1.2 continuation string literal
 
 If string literal is too long to put on one line, one can end line with \, then write other string in next line. But the next must start at the beginning, indents is not allowed:
+```c
 	printf("When you come to a fork in the road, take it. \
 -- Yogi Berra");
+```
 
-13.1.3 how to store string literal
+### 13.1.3 how to store string literal
 
 We use string literal in printf() and scanf(), but how string literal be passed to these function calls? 
 
-Virtually, C-lan view string literal as character array. When compiler meet string literal with length n, it allocates n+1 memory space for it to store all characters and an additional '\0'.
+Virtually, C views string literal as character array. When compiler meets string literal with length n, it allocates n+1 memory space for it to store all characters and an additional **'\0' charater**.
 
 '\0' is one byte whose bits are all 0.
 
-Since string literal is stored like array, compiler will treat it as char * pointer. So printf() and scanf() virtually receive char * pointer as its first argument:
+Since string literal is stored like array, compiler will treat it as **char * pointer**. So printf() and scanf() virtually receive char * pointer as its first argument:
+```c
+	// printf(char *format, ...);
 	printf("abc");
-
+```
 the address of "abc" (namely the pointer) is passed to printf().
 
-13.1.4 operations to string literal
+### 13.1.4 operations to string literal
 
-string literal can be viewed as char * type pointer, but it is used as rvalue:
+string literal can be viewed as char * type pointer, but it can only be used as rvalue:
+```c
 	char *p;
 	p = "abc";
 
 	char ch;
 	ch = "abc"[1];
+```
+Notice: pointer is the address but only variable. pointer variable can be assigned with pointer(address). So pointer is rvalue, pointer variable is lvalue.
 
-13.1.5 string literal and character constant
+### 13.1.5 string literal and character constant
 
-character constant, which is declared as char type, is stored as integer, for example 'a'. string literal is stored as pointer.
+**character constant**, which is declared as char type, is stored as integer, for example 'a'. string literal is stored as pointer.
 
-13.2 string variable
+## 13.2 string variable
 
-C-lan uses character array to store string as long as it ends with '\0'.
+C uses character array to store string as long as it ends with '\0'.
 
-13.2.1 initiate string variable
-
+### 13.2.1 initiate string variable
+```c
 	char date1[8] = "June 14";
+```
+Notice: 
 
-string variable can be initiated at the definition. But can't directly assign string literal to string variable:
-	date1 = "July 15"; /* WRONG */
+## 13.2.2 character array and character pointer
 
-because *date1* now is viewed as array name (namely pointer).
-
-13.2.2 character array and character pointer
-
-It is interesting to differentiate *character array* and *character pointer*:
+It is interesting to differentiate **character array** and **character pointer**:
+```c
 	char date[] = "June 14";
 	char *date  = "June 14";
+```
+array and pointer are so relavant that **date** in both these two declarations can be used as string, especially for functions receive character array or character pointer as its argument.
 
-array and pointer are so relavant that *date* in both these two declarations can be used as string, especially for functions receive character array or character pointer as its argument.
-
-13.3 read and write string
+## 13.3 read and write string
 
 write string is relatively easier (printf() or puts()) than read, because the input string maybe longer than the string variable. One can read the string at one time (scanf() or gets()) or read one character at one time.
 
-13.3.1 printf() and puts() to write string
+### 13.3.1 printf() and puts() to write string
 
 conversion %s allows printf() to write string:
+```c
 	char str[] = "Are we having fun yet?";
 
 	printf("%s\n", str);
-
+```
 printf() will write character one by one until it meets '\0', so it is dangerous when '\0' is missing.
 
 one can use *length description* to show parts of string:
+```c	
 	printf("%.6s\n", str);
+```
 
-C-lib also provides puts() to write string:
+C also provides puts() to write string:
+```c
 	puts(str);
-
+```
 puts() receive string and write that with an additional '\n'.
 
-13.3.2 scanf() and gets() to read string
+### 13.3.2 scanf() and gets() to read string
 
 conversion %s allows scanf() to read string into character array:
+```c	
 	scanf("%s", str);
-
+```
 we find that there no & before str, because str is array name (namely pointer).
 
-scanf() will skip space and then read character into str until it meets space. scanf() will always store '\0' in the array end.
+scanf() will skip space and then read character into str **until it meets space**. scanf() will always store '\0' in the array end.
 
-Notice that *space* here represents ' ', '\n', '\t'. So scanf() usually can't be used for read one line. And to read one line, C-lib provides gets().
+Notice that **space** here represents ' ', '\n', '\t'. So scanf() usually can't be used for read one line. And to read one line, C-lib provides gets().
 
 gets() read characters into array and puts '\0' at the end. It won't skip space and will stop until meets '\n'.
 
-13.3.3 read character one by one to read string
+### 13.3.3 read character one by one to read string
 
 Sometimes scanf() and gets() are not flexible and can't meet our requirement, so we need to code function to read input. 
 
@@ -107,6 +117,7 @@ There three questions to be asked:
 	3.What function will do when string is too long: dismiss additional characters or leave them for the next input?
 
 Based on above, we code read_line(): it won't skip space, stop at '\n' (not included), and dismiss addtional characters:
+```c	
 	int read_line(char str[], int n) {
 		int ch, i = 0;
 
@@ -116,10 +127,11 @@ Based on above, we code read_line(): it won't skip space, stop at '\n' (not incl
 		str[i] = '\0';
 		return i;
 	}
-13.4 access characters in string
+```
+## 13.4 access characters in string
 
 since string is stored as array, one can use index to access characters in string:
-
+```c
 	/* counts the number of space in string */
 	int count_spaces(const char s[]) {
 		int count = 0, i;
@@ -129,9 +141,9 @@ since string is stored as array, one can use index to access characters in strin
 				count++;
 		return count;
 	}
-
+```
 Many programmers tend to use pointer to trace the location in string instead of index, like we do in chapter 12.2. We use pointer arithmetic operation to recompiler the count_spaces(): by increment s, count_spaces() can also access characters in string:
-
+```c
 	/* version 2: pointer */
 	int count_spaces(const char *s) {
 		int count = 0;
@@ -140,49 +152,50 @@ Many programmers tend to use pointer to trace the location in string instead of 
 				count++;
 		return count;
 	}
+```
+Notice that **const** prevents the change to the object s points instead of s itself, so increment s is legal.
 
-Notice that const is to prevent the change to the object s points to instead of s itself, so increment s is legal.
-13.5 C-lan's string library
+## 13.5 C-lan's string library
 
-<string.c> string copy functions
-
+`<string.c>` string copy functions
+```c
 	char *strcpy(char *s1, const char *s2);
-
+```
 strcpy() copies string2 to string1 and return string1, string 2 is declared as const since it wasn't changed.
 
 Because of the lack of copy with assign operator (str2 = "abcd", str2 is a character array), strcpy() makes it possible (strcpy(str2, "abcd"))
-
+```c
 	char *strncpy(char *s1, char *s2, int n);
-
+```
 strncpy() copies string2 to string1 and restrict the number by n. (strncpy(str1, str2, sizeof(str1)))
 
-<string.c> string length functions
-
+`<string.c>` string length functions
+```c
 	size_t strlen(const char *s);
-
+```
 strlen() returns the length of string, the number of character before '\0'. Notice size_t is typedef, represents unsigned integer, normally we can treat it as integer.
-
+```c
 	int len;
 	len = strlen("abc"); /* len = 3 */
 	len = strlen(""); /* len = 0 */
 	strcpy(str1, "abc");
 	len = strlen(str1); /* len = 3 */
-
-<string.c> string concatenate
-
+```
+`<string.c>` string concatenate
+```c
 	char *strcat(char *s1, const char *s2);
-
+```
 strcat() attaches string2 at the end of string1 and return string1.
-
+```c
 	strcpy(str1, "abc");
 	strcat(str1, "def"); /* str1 is "abcdef" */
-
+```
 Notice! If str1 is not big enough to contain the attached string, the result will be unpredictable.
-
+```c
 	char *strncat(char *s1, const char *s2, int n);
-
-<string.h> string compare
-
+```
+`<string.h>` string compare
+```c
 	int strcmp(const char *s1, const char *s2);
-
+```
 strcmp() returns value of <0, 0, and >0 representing s1 < s2, s1 = s2, s1 > s2.

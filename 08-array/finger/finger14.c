@@ -5,18 +5,26 @@ int main(void) {
 	char ch;
 	int i = 0, j, k, start, end;
 
+	/* store input into sentence; end with ./?/! */
 	printf("Enter a sentence: ");
 	while(ch = getchar()) {
 		if (ch == '.' || ch == '?' || ch == '!') {
 			sentence[i] = ch;
 			break;
 		}
-		sentence[i++] = ch;
+		sentence[i++] = ch; /* notice i always points to the top*/
 	}
 
 	printf("Reversal of sentence: ");
 
 	end = i;
+
+	/*
+	 * xxxx, xxxx xxxx, xxxx. 
+	 *                       ^
+	 *                       |
+	 *                   i is here
+	 */
 
 	int flag = 0;
 	for (j = i-1; j>=0 ; j--) {

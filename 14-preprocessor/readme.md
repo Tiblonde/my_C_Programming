@@ -1,15 +1,18 @@
-14.1 the working principle of preprocessor
+# 14 preprocessor
 
-The behavior of preprocessor is controlled by preprocessor command (#command). We have met two commands: #define and #include.
+## 14.1 the working principle of preprocessor
 
-#define defines a macro, a name to represent other stuff, like constant or expression. Preprocessor will substitute macro with definition later.
+The behavior of preprocessor is controlled by **preprocessor command (#command)**. We have met two commands: `#define` and `#include`.
 
-#include tells preprocessor to open a specific file, and includes its content as part of this compiling file.
+`#define` defines a **macro**, a name to represent other stuff, like constant or expression. Preprocessor will substitute macro with definition later.
+
+`#include` tells preprocessor to open a specific file, and includes its content as part of this compiling file.
 
 Preprocessor is integerated with compiler nowaday. GCC provides a method to provide the output of preprocessor.
 
-14.2 preprocessor command
+## 14.2 preprocessor command
 
+```
 	1.macro definition
 	2.file include
 	3.conditional compile
@@ -20,15 +23,20 @@ Preprocessor is integerated with compiler nowaday. GCC provides a method to prov
 	Always end at the first '\n', except for expanding with \
 	Allow to exist at anywhere
 	Allow to commit
+```
 
-14.3 macro definition
+## 14.3 macro definition
 
-	---simple macro---
+```
+	//---simple macro---
 	#define identifier substitute-list
+```
 
-substitute-list is a sery of prepocessor marker. It can include identifier, keyword, constant, string literal, operator, and alignment.
+**substitute-list** is a sery of **prepocessor marker**. It can include identifier, keyword, constant, string literal, operator, and alignment.
 
 Notice: addtional marker will be part of substitute-list, like:
+
+```c	
 	#define N = 100
 	...
 	int a[N]; 			/* become int a[= 100] */
@@ -36,54 +44,72 @@ Notice: addtional marker will be part of substitute-list, like:
 	#define N 100;
 	...
 	int a[N];			/* become int a[100;]*/
+```
 
-simple macro is mainly used for manifest constant, like name number, character, and string:
+simple macro is mainly used for **manifest constant**, like number, character, and string:
+
+```c
 	#define TRUE 1
 	#define FLASE 0
 	#define MEM_ERR "Error: not enough memory"
+```
 
+```
 	---macro with parameters---
 	#define identifier(x1, x2,..., xn) substitute-list
+```
 
-xx is the parameters of macro, they can exist anywhere in substitue-list. 
+**xx** is the parameters of macro, they can exist anywhere in substitue-list. 
 
 Notice: there is no space between identifier and (, otherwise compiler will view (xx) as part of substitute-list.
 
+```c
 	#define MAX(x, y) ((x)>(y)?(x):(y))
 	...
 	i = MAX(j+k, m-n);
+```
 
 macro with parameters is usually used as functions. MAX is the function return the bigger one between two input.
 
 It is legal to have empty parameters:
+
+```c
 	#define getchar() getc(stdin)
+```
 
-macro with parameters not only useful for mimic function call, but also useful for substitute tidious mode:
+macro with parameters not only useful to mimic function call, but also useful to substitute tidious mode:
+
+```c
 	#define PRINT_INT(n) printf("%d\n", n)
+```
 
-	---# operator---
+### 14.3.2 # operator
+
 macro can have two specific operators: # and ##. 
 
-# operator converts one parameter into string literal, it only occurs in the substitute-list of macro with parameters:
+**# operator** converts one parameter into string literal, it only occurs in the substitute-list of macro with parameters:
+```c	
 	#define PRINT_INT(n) printf(#n " = %d\n", n)
+```
 
-#n here create a string literal, the macro call:
+**#n** here create a string literal, the macro call:
+```c
 	PRINT_INT(i/j);
-
+```
 is equivalent to:
+```c
 	printf("i/j" " = %d\n", i/j);
+```
+### 14.3.3 ## operator
 
-	---## operator---
-
-## operator concatenate two markers to form one marker:
+**## operator** concatenates two markers to form one marker:
+```c	
 	#define MK_ID(n) i##n
 	...
 	int MK_ID(1), MK_ID(2), MK_ID(3);
-
-is equivalent to:
-	int i1, i2, i3;
-
-14.3.6 bracket in macro
+	// int i1, i2, i3;
+```
+### 14.3.6 bracket in macro
 
 To add bracket in macro, there are two rules to be followed:
 	1. if the substitute-list include operators, then it must be bracketed:
@@ -91,25 +117,30 @@ To add bracket in macro, there are two rules to be followed:
 	2. if macro with parameters, every parameter should be bracketed:
 	#define SCALE(x) ((x)*10)
 
-14.3.7 create long macro
+### 14.3.7 create long macro
 
-, operator is useful to create long macro:
+**, operator** is useful to create long macro:
+```c
 	#define ECHO(s) (gets(s), puts(s))
 	...
 	ECHO(str);
-
-or we can use {} to create statement:
+```
+or we can use **{}** to create statement:
+```c	
 	#define ECHO(s) {gets(s); puts(s);}
-
-but such if statement will not work properly:
+```
+but the followed if statement will not work properly:
+```c
 	if (echo_flag)
 		ECHO(str); /*<-- ; makes a void statement*/
 	else
 		gets(str);
+```
 
-14.3.8 predefined macro
+### 14.3.8 predefined macro
 
-C-lan provides some predefined macros, which represent integer constant or string literal:
+C provides some predefined macros, which represent integer constant or string literal:
+
 	__LINE__	the line number of compiling file
 	__FILE__	the name of compiling file
 	__DATE__	the date of compile
@@ -117,9 +148,11 @@ C-lan provides some predefined macros, which represent integer constant or strin
 	__STDC__	if compiler obey C-standard, it will be 1
 
 __DATA__ and __TIME__ can be used like:
+```c
 	printf("Compiled on %s at %s\n", __DATE__, __TIME__);
-
+```
 __LINE__ and __FILE__ can be used to find error
+```c
 	#define CHECK_ZERO(divisor) \
 		if (divisor == 0) \
 			printf("*** Atempt to divide by zero on line %d" \
@@ -127,42 +160,48 @@ __LINE__ and __FILE__ can be used to find error
 	...
 	CHECK_ZERO(j);
 	k = i / j;
+```
 
-14.4 conditional compile
+## 14.4 conditional compile
 
 	---#if and #endif---
 
 conditional compile can help us to store some debug functions and dismiss them when not needed:
+```c
 	#define DEBUG 1
 	...
 	#if DEBUG
 	printf("Value of i : %d\n", i);
 	printf("Value of j : %d\n", j);
 	#endif
+```
 
 when meet #if, preprocessor will check the value of DEBUG. If DEBUG != 0, it will keep these printf(), and remove #if and #endif.
-
+```c
 	#if constant
 	#endif
+```
 
 Notice: #if will treat constant which is not declared before as 0.
 
 	---defined operator---
 defined operator is another operator (# and ##) specific for preprocessor. When act on identifier, it will return 1 if the identifier have been defined.
-
+```c
 	#if defined(DEBUG)
 	...
 	#endif
-
+```
 the bracket is not necessory:
+```c
 	if defined DEBUG
 	...
 	#endif
-
+```
 	---#ifdef and #ifndef---
-
+```c
 	#ifdef identifier
 	#ifndef identifier
+```
 
 #ifdef tests if one identifier has been defined as macro. The effect of #ifdef is as same as #if defined.
 
@@ -178,7 +217,7 @@ to provide more functions, preprocessor supports #elif and #else:
 	#elif constant
 	#else
 
-14.4.5 use conditional compile
+### 14.4.5 use conditional compile
 
 Practical conditional compile is not only useful in debug, but also for:
 	1. the tranplantable program in different machine:
@@ -203,7 +242,7 @@ Practical conditional compile is not only useful in debug, but also for:
 		#if 0
 			some codes
 		#endif
-14.5 other command
+## 14.5 other command
 
 	---#error---
 
