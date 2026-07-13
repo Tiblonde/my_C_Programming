@@ -138,4 +138,146 @@ Notice: **dangling pointer** is the phonemenon that free(p) will release memory 
 
 ## 17.5 linked list
 
-Dynamic allocation is useful for the structure of sheet, tree, graph and other linked data-type. Linked List is made of a sery of struct, each node has a pointer points to the next node
+Dynamic allocation is useful for the structure of sheet, tree, graph and other linked data-type. **Linked List** is made of a sery of struct, each node has a pointer points to the next node, the last node points to NULL.
+
+### 17.5.1 declare node struct
+
+to build a linked list, we need to declare the node struct firstly:
+```c
+	struct node {
+		int value;
+		struct node *next; /* points the next node */
+	};
+```
+Notice next is a struct node pointer, so it can store NULL;
+
+We can make a pointer variable points NULL, that is the end of list points:
+```c
+	struct node *first = NULL;
+```
+Next, we want creat more nodes and add them to the linked list, it follows 3 steps:
+```
+	1. allocate memory for each node
+	2. store data into node
+	3. inject node into list
+``` 
+we need another pointer variable for the reture value of allocate() to create new node:
+```c
+	struct node *new_node;
+	// new_node points one memory store struct node
+	new_node = allocate(sizeof(struct node));
+
+	// store data into node
+	*new_node.value = 10;
+
+	//or we can use -> operator
+	new_node->value = 10;
+```
+the -> operator is designed to access member in struct: `(struct_pointer)->member` is equivalent to `*struct_pointer.member`. It is legal to assign because -> operator generate lvalue. It is also legal to use it in scanf:
+```c
+	scanf("%d", &new_node->value);
+```
+Next, we will introduce how to inject node into the beginning of linked list (which is the simplest situation).
+
+As new_node points the node ready for injection and first points the beginning of linked list, we should change member next to let it points the beginning node:
+```c
+	// now new_node points the end of linked list
+	new_node->next = first;
+	// let first points the beginning of list back again
+	first = new_node;
+```
+Notice: it is chaos when explaining how to inject first node into a null linked list. Technically speak, new_node always points the memory to store node, which will be injected into list later. And first always points beginning node of list. We assign first to NULL in order for the consistence.
+
+Furthermore, we can make a function to add node into list:
+```c
+	struct node *add_to_list(struct node *list, int n) {
+		struct node *new_node;
+
+		new_node = allocate(sizeof(struct node));
+		if (new_node == NULL) {
+			printf("error: malloc failed in add_to_list\n");
+			exit(EXIT_FAILURE);
+		}
+		new_node->value = n;
+		new_node->next = list;
+		return new_node;
+	}
+
+	first = add_to_list(first, 10);
+	first = add_to_list(first, 20);
+```
+we can use add_to_list() to create a linked list to store user input:
+```c
+	struct node *read_numbers(void) {
+		struct node *first = NULL;
+		int n;
+
+		printf("Enter a series of integers (0 to terminate): ");
+		for (;;) {
+			scanf("%d", &n);
+			if (n == 0)
+				return first;
+			first = add_to_list(first, n);
+		}
+	}
+```
+
+### 17.5.5 search in linked list
+
+for loop is useful t search in linked list:
+```c
+	struct node *search_list(struct node *list, int n) {
+		struct node *p;
+
+		for (p = list; p!=NULL; p = p->next)
+			if (p->value == n)
+				return p;
+		return NULL;
+	}
+```
+
+### 17.5.6 delete node from linked list
+
+delete node also follows 3 steps:
+```
+	1. locate the node to be deleted
+	2. change the before node making it pass the node
+	3. call free() to delete the memory
+```
+locate one node to be deleted needs **tracing pointer**, namely second pointer points the before node:
+```c
+	for (cur = list, prev = NULL;
+		 cur != NULL && cur->value != n;
+		 prev = cur, cur = cur->next)
+		;
+```
+In such way, we can locate node by cur and the before node by prev, and now we are ready to delete the cur node:
+```c
+	prev->next = cur->next;
+	free(cur);
+```
+we can also make a function to delete that node:
+```c
+	struct node *delete_from_list(struct node *list, int n) {
+		struct node *cur, *prev;
+
+		for (cur = list, prev = NULL;
+			 cur != NULL && cur->value != n) ;
+		if (cur == NULL)
+			return list;
+		if (prev == NULL)
+			list = list->next;
+		else
+			prev->next = cur->next;
+		free(cur);
+		return list;
+	}
+```
+Notice that if the deleted node is on the beginning and end.
+
+### 17.5.7
+
+We can use the same method to store node in order. The trick is to compare before injection:
+```
+	inventory2.c
+```
