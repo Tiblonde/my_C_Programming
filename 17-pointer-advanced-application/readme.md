@@ -281,3 +281,134 @@ We can use the same method to store node in order. The trick is to compare befor
 ```
 	inventory2.c
 ```
+
+## 17.6 pointer points pointer
+
+in chapter 13.7 we have meet the **pointer points pointer**: we created a char * type array, so the pointer points array's element will be `char **` type.
+
+Let's review the function in chapter 17.5:
+```c
+	struct node *add_to_list(struct node *list, int n) {
+		struct node *new_node;
+
+		new_node = malloc(sizeof(struct node));
+		if (new_node == NULL) {
+			printf("Error: malloc failed in add_to_list.\n");
+			exit(EXIT_FAILURE);
+		}
+		new_node->value = n;
+		new_node->next = list;
+		return new_node;
+	}
+```
+when we call add_to_list(), we pass the pointer points the beginning of linked list, it will return a pointer points the beginning of new linkde list.
+
+Supposing that we modify the return statement with `list = new_node;`, it actually can't archieve the effect that *change list points the beginning of new linked list*, because list, the pointer variable, receives pointer passed as value:
+```c
+	add_to_list(first, 10);
+	// first (pointer points beginning) can't be changed
+```
+
+but if we pass a pointer points first, that will work well:
+```c
+	void add_to_list(struct node **list, int n) {
+		struct node *new_node;
+
+		new_node = malloc(sizeof(struct node));
+		if (new_node == NULL) {
+			printf("Error: malloc failed in add_to_list.\n");
+			exit(EXIT_FAILURE);
+		}
+		new_node->value = n;
+		new_node->next = *list;
+		*list = new_node;
+	}
+```
+
+## 17.7 pointer points function
+
+C allows pointer points function (yes, not constrain to data!). functions also occupy memory, so it is not strange to have a function pointer.
+
+Passing function pointer as argument is very common. Supposing we inplement integrate() to calculate the integration between a and b in function f, so it needs a function pointer argument:
+```c
+	double integrate(double (*f)(double), double a, double b);
+```
+`(*f)`, the round brackets represent that f is a function pointer, instead of a function return pointer. Moreover, it is legal to use function declaration:
+```c
+	double integrate(double f(double), double a, double b);
+```
+
+When we call integrate(), it receives function name as the first argument:
+```c
+	result = integrate(sin, 0.0, PI/2);
+```
+inside integrate(), we can access function like this:
+```c
+	y = (*f)(x); /* this is better because f is a function pointer */
+	// or this
+	y = f(x); 
+```
+### 17.7.2 qsort()
+
+`<stdlib.h>` provides powerful function qsort() to sort any array. Since array's element can be any type, we should tell qsort() how to determine which element is smaller. So we can make compare() to pass to:
+```c
+	void qsort(void *base, size_t nmemb, size_t size,
+			   int (&compar)(const void *, const void *));
+```
+**base** points array's first element (just pass the array' name is OK). **nmemb** is the number of elements to be sorted. **size** is the size of each element. **compar** is function pointer points compare().
+
+We find that compare() must have two `void *` argument, so inside function there should be **type conversion** before we can access elements by pointer:
+```c
+	/* version 1: ordinary*/
+	int compare(const void *p, const void *q) {
+		const struct part *p1 = p;
+		const struct part *q1 = q;
+
+		if (p1->number < q1->number)
+			return -1;
+		else if (p1->number == q1->number)
+			return 0;
+		else 
+			return 1;
+	}
+
+	/* version 2: reduced */
+	int compare(const void *p, const void *q) {
+		if (((struct part *) p)->number < ((struct part *) q)->number)
+			return -1;
+		else if (((struct part *) p)->number == ((struct part *) q)->number)
+			return 0;
+		else 
+			return 1;
+	}
+```
+
+### 17.7.3 function pointer 's other usage
+
+C treats function pointer as data pointer, so we can store function pointer into variable, array, or member in struct or union, even return value.
+
+```c
+	/* function pointer that points any function with 
+	 * int argument and void return
+	 */
+	void (*pf)(int);
+
+	pf = f; // f is such function
+
+	/* Once pf points f, we can call f() like: */
+	(*pf)(i);
+	pf(i);
+```
+
+Array with function pointer element is a common usage of function pointer. Supposing that we need to show user the usable command menu, where we implement functions to archieve these commands, so we can store these function pointer into array:
+```c
+	void (*file_cmd[])(void) = {new_cmd,
+								open_cmd,
+								close_cmd,
+								close_all_cmd,
+								save_cmd,
+								save_as_cmd,
+								exit_cmd};
+
+	// if user enter n (n is integer range from 0 to 6) then one can access that function using index
+	(*file_cmd[n])();
